@@ -14,7 +14,6 @@ ServerSocketController.prototype.listenToConnection = function () {
                     dbConn.collection('rooms').findOne({ name: room.roomName }, function (findErr, result) {
                         if (!findErr) {
                             clientSocket.join(room.roomName);
-                            console.log("SUCESSO!");
                             _this._socket["in"](room.roomName).emit('new_client', room.clientName + " acabou de entrar na sala!");
                         }
                         else {
