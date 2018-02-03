@@ -2,8 +2,8 @@ const router = require('express').Router();
 const socketClient = require("socket.io-client")('http://localhost:8888/');
 const SC = require('../controllers/SocketController');
 
-router.get("/create", (req: any, res: any) => {
-  const {name} = req.query;
+router.post("/create", (req: any, res: any) => {
+  const {name} = req.body;
 
   if (name) {
     const sc = new SC();

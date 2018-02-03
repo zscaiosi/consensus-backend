@@ -1,5 +1,7 @@
 const express = require("express");
 const rooms = require("../routes/roomsRoutes");
+const bodyParser = require('body-parser');
+const cors = require('cors');
 //Configurando servidor http express e vinculando socket.io
 const app = express();
 const http = require("http").Server(app);
@@ -15,6 +17,10 @@ module.exports = {
   httpServer: function(){
     //Middlewares setup
     app.use(loggerMiddleware);
+    app.use(cors());
+    app.use(bodyParser.urlencoded({ extended: true }));
+    app.use(bodyParser.json());
+    app.use(bodyParser.text());
     app.use("/room", rooms);
     return http;
     
