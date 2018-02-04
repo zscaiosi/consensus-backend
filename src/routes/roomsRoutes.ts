@@ -1,5 +1,4 @@
 const router = require('express').Router();
-const socketClient = require("socket.io-client")('http://localhost:8888/');
 const SC = require('../controllers/SocketController');
 
 router.post("/create", (req: any, res: any) => {
@@ -19,10 +18,19 @@ router.post("/create", (req: any, res: any) => {
 
 });
 
-router.get("/join", (req: any, res: any) => {
-    
+router.get("/join", (req: any, res: any) => {  
   const {name} = req.query;
 
+  if (name) {
+    const sc = new SC();
+    sc.enterRoom(name, (status: number, result: any) => {
+
+      res.status(status).json({ response: result });
+
+    });
+  } else {
+    res.status(404).json({ response: '!name' });
+  }
 });
 
 module.exports = router;
