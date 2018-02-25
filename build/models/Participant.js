@@ -5,7 +5,7 @@ function ParticipantModel(id, name, currentRoom) {
     this._name = name;
     this._currentRoom = currentRoom;
 }
-ParticipantModel.prototype.registerParticipation = function (roomName, clientName, clientId, next) {
+ParticipantModel.prototype.registerParticipation = function (clientId, clientName, roomName, next) {
     mongodbClientP.connect("mongodb://localhost:27017/consensus_db", function (err, db) {
         if (!err) {
             var dbConn = db.db('consensus_db');
@@ -26,7 +26,7 @@ ParticipantModel.prototype.registerParticipation = function (roomName, clientNam
         db.close();
     });
 };
-ParticipantModel.prototype.registerExit = function (roomName, clientId, clientName, next) {
+ParticipantModel.prototype.registerExit = function (clientId, clientName, roomName, next) {
     mongodbClientP.connect("mongodb://localhost:27017/consensus_db", function (err, db) {
         if (!err) {
             var dbConn = db.db('consensus_db');

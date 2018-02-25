@@ -9,29 +9,29 @@ ServerSocketController.prototype.listenToConnection = function () {
     this._socket.on('connection', function (clientSocket) {
         clientSocket.on('enter_room', function (room) {
             console.log("Enter: ", room);
-            mongodbClient.connect("mongodb://localhost:27017/consensus_db", function (err, db) {
-                if (!err) {
-                    var dbConn = db.db('consensus_db');
-                    dbConn.collection('rooms').findOne({ roomName: room.roomName, open: true }, function (findErr, result) {
-                        if (!findErr) {
-                            clientSocket.join(room.roomName);
-                            _this._socket["in"](room.roomName).emit('new_client', room.clientName + " acabou de entrar na sala!");
-                        }
-                        else {
-                            _this._socket.emit(room.clientName, 'A sala solicitada não existe!');
-                        }
-                        db.close();
-                    });
+            var p = new Participant(room.clientId, room.clientName, room.roomName);
+            p.registerParticipation(room.clientId, room.clientName, room.roomName, function (status, result) {
+                if (status === 200) {
+                    clientSocket.join(room.roomName);
+                    _this._socket["in"](room.roomName).emit('new_client', room.clientName + " acabou de entrar na sala!");
                 }
                 else {
-                    console.log(err);
+                    _this._socket.emit(room.clientId, 'A sala solicitada não existe!');
                 }
             });
         });
         clientSocket.on('exit_room', function (room) {
             console.log("Exit: ", room);
             var p = new Participant(room.clientId, room.clientName, room.roomName);
-            p.registerExit();
+            p.registerExit(room.clientId, room.clientName, room.roomName, function (status, result) {
+                if (status === 200) {
+                    _this._socket.leave(room.roomName);
+                    _this._socket["in"](room.roomName).emit('client_left', room.clientName + " acabou de sair da sala!");
+                }
+                else {
+                    _this._socket.emit(room.clientId, room.clientName + ", n\u00E3o foi poss\u00EDvel registrar sua sa\u00EDda, por favor, tente novamente! \n Error: " + result);
+                }
+            });
         });
     });
 };
