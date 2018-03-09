@@ -10,14 +10,12 @@ ServerSocketController.prototype.listenToConnection = function () {
         clientSocket.on('enter_room', function (room) {
             console.log("Enter: ", room);
             var p = new Participant(room.clientId, room.clientName, room.roomName);
-            p.registerParticipation(room.clientId, room.clientName, room.roomName, function (status, result) {
-                if (status === 200) {
-                    clientSocket.join(room.roomName);
-                    _this._socket["in"](room.roomName).emit('new_client', room.clientName + " acabou de entrar na sala!");
-                }
-                else {
-                    _this._socket.emit(room.clientId, 'A sala solicitada não existe!');
-                }
+            clientSocket.join(room.roomName);
+            _this._socket["in"](room.roomName).emit('new_client', room.clientName + " acabou de entrar na sala!");
+            _this._socket["in"](room.roomName).emit(room.clientId, "Voc\u00EA, " + room.clientName + ", acabou de entrar na sala!");
+            clientSocket.on('new_msg', function (payload) {
+                console.log('Msg: ', payload.msg, payload.info);
+                _this._socket["in"](payload.info.roomName).emit('new_msg_response', { msg: 'Cheogu nova mensagem!', from: room.clientName });
             });
         });
         clientSocket.on('exit_room', function (room) {
@@ -35,12 +33,12 @@ ServerSocketController.prototype.listenToConnection = function () {
         });
     });
 };
-ServerSocketController.prototype.createRoom = function (name, next) {
+ServerSocketController.prototype.createRoom = function (payload, next) {
     mongodbClient.connect("mongodb://localhost:27017/consensus_db", function (err, db) {
         if (!err) {
             var dbConn = db.db('consensus_db');
-            var generatedId = moment(new Date()).format() + "_" + name;
-            dbConn.collection('rooms').insert({ _id: generatedId, roomName: name, open: true }, function (insertErr, result) {
+            var generatedId = moment(new Date()).format() + "_" + payload.name;
+            dbConn.collection('rooms').insert({ _id: generatedId, roomName: payload.name, open: true, ownerName: payload.ownerName, ownerPassword: payload.ownerPassword }, function (insertErr, result) {
                 if (!insertErr) {
                     next(200, result);
                 }

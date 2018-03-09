@@ -1,10 +1,10 @@
 var router = require('express').Router();
 var SC = require('../controllers/SocketController');
 router.post("/create", function (req, res) {
-    var name = req.body.name;
+    var _a = req.body, name = _a.name, ownerName = _a.ownerName, ownerPassword = _a.ownerPassword;
     if (name) {
         var sc_1 = new SC();
-        sc_1.createRoom(name, function (status, result) {
+        sc_1.createRoom({ name: name, ownerName: ownerName, ownerPassword: ownerPassword }, function (status, result) {
             console.log("Creating: ", name);
             res.status(status).json({ response: result });
         });
